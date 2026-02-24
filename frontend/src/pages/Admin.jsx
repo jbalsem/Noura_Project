@@ -27,6 +27,18 @@ export default function Admin() {
   const [phone, setPhone] = useState("");
   const [hours, setHours] = useState("");
   const [mapUrl, setMapUrl] = useState("");
+  const [editingId, setEditingId] = useState(null);
+const [editLoc, setEditLoc] = useState({
+  name: "",
+  address1: "",
+  address2: "",
+  city: "",
+  state: "",
+  zip: "",
+  phone: "",
+  hours: "",
+  mapUrl: "",
+});
 
   async function loadCategories() {
     const res = await fetch(`${API}/api/categories`, {
@@ -113,6 +125,7 @@ export default function Admin() {
       alert(`Add location failed (${res.status}): ${text}`);
       return;
     }
+    
   
     // reset
     setLocName("");
@@ -124,6 +137,60 @@ export default function Admin() {
     setPhone("");
     setHours("");
     setMapUrl("");
+  
+    loadLocations();
+  }
+  function startEdit(l) {
+    setEditingId(l._id);
+    setEditLoc({
+      name: l.name || "",
+      address1: l.address1 || "",
+      address2: l.address2 || "",
+      city: l.city || "",
+      state: l.state || "",
+      zip: l.zip || "",
+      phone: l.phone || "",
+      hours: l.hours || "",
+      mapUrl: l.mapUrl || "",
+    });
+  }
+  
+  function cancelEdit() {
+    setEditingId(null);
+  }
+  
+  async function saveEdit(id) {
+    const res = await fetch(`${API}/api/locations/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(editLoc),
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Update failed (${res.status}): ${text}`);
+      return;
+    }
+  
+    setEditingId(null);
+    loadLocations();
+  }
+  
+  async function deleteLocation(id) {
+    const ok = window.confirm("Delete this location?");
+    if (!ok) return;
+  
+    const res = await fetch(`${API}/api/locations/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Delete failed (${res.status}): ${text}`);
+      return;
+    }
   
     loadLocations();
   }
@@ -211,20 +278,54 @@ export default function Admin() {
 
 <h2 style={{ marginTop: 24 }}>Current Locations</h2>
 
-{locations.map((l) => (
-  <div key={l._id} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 10 }}>
-    <b>{l.name}</b>
-    <div>{l.address1}{l.address2 ? `, ${l.address2}` : ""}</div>
-    <div>{l.city}{l.state ? `, ${l.state}` : ""} {l.zip}</div>
-    {l.phone && <div>📞 {l.phone}</div>}
-    {l.hours && <div>🕒 {l.hours}</div>}
-    {l.mapUrl && (
-      <a href={l.mapUrl} target="_blank" rel="noreferrer">
-        Open in Maps
-      </a>
-    )}
-  </div>
-))}
+{locations.map((l) => {
+  const isEditing = editingId === l._id;
+
+  return (
+    <div key={l._id} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 10 }}>
+      {!isEditing ? (
+        <>
+          <b>{l.name}</b>
+          <div>{l.address1}{l.address2 ? `, ${l.address2}` : ""}</div>
+          <div>{l.city}{l.state ? `, ${l.state}` : ""} {l.zip}</div>
+          {l.phone && <div>📞 {l.phone}</div>}
+          {l.hours && <div>🕒 {l.hours}</div>}
+          {l.mapUrl && (
+            <div>
+              <a href={l.mapUrl} target="_blank" rel="noreferrer">Open in Maps</a>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <button onClick={() => startEdit(l)}>Edit</button>
+            <button onClick={() => deleteLocation(l._id)} style={{ color: "crimson" }}>
+              Delete
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ display: "grid", gap: 8, maxWidth: 500 }}>
+            <input value={editLoc.name} onChange={(e) => setEditLoc({ ...editLoc, name: e.target.value })} placeholder="Store name" />
+            <input value={editLoc.address1} onChange={(e) => setEditLoc({ ...editLoc, address1: e.target.value })} placeholder="Address 1" />
+            <input value={editLoc.address2} onChange={(e) => setEditLoc({ ...editLoc, address2: e.target.value })} placeholder="Address 2" />
+            <input value={editLoc.city} onChange={(e) => setEditLoc({ ...editLoc, city: e.target.value })} placeholder="City" />
+            <input value={editLoc.state} onChange={(e) => setEditLoc({ ...editLoc, state: e.target.value })} placeholder="State" />
+            <input value={editLoc.zip} onChange={(e) => setEditLoc({ ...editLoc, zip: e.target.value })} placeholder="ZIP" />
+            <input value={editLoc.phone} onChange={(e) => setEditLoc({ ...editLoc, phone: e.target.value })} placeholder="Phone" />
+            <input value={editLoc.hours} onChange={(e) => setEditLoc({ ...editLoc, hours: e.target.value })} placeholder="Hours" />
+            <input value={editLoc.mapUrl} onChange={(e) => setEditLoc({ ...editLoc, mapUrl: e.target.value })} placeholder="Google Maps link" />
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <button onClick={() => saveEdit(l._id)}>Save</button>
+            <button onClick={cancelEdit}>Cancel</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+})}
     </div>
   );
 }

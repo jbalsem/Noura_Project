@@ -15,7 +15,6 @@ export default function Locations() {
   return (
     <div style={{ padding: 24 }}>
       <h1>Our Locations</h1>
-
       {locations.length === 0 && <div>No locations yet.</div>}
 
       {locations.map((l) => (
