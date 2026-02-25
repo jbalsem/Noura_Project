@@ -5,6 +5,21 @@ const API = "http://localhost:5050";
 export default function Admin() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [editingProductId, setEditingProductId] = useState(null);
+const [editProduct, setEditProduct] = useState({
+  name: "",
+  price: "",
+  description: "",
+  categoryId: "",
+  ageMin: "0",
+  ageMax: "99",
+  isBestSeller: false,
+  isNewArrival: false,
+  discountPercent: "0",
+});
+
+
+
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -40,6 +55,9 @@ const [editLoc, setEditLoc] = useState({
   mapUrl: "",
 });
 
+const [discountPercent, setDiscountPercent] = useState("0");
+
+
   async function loadCategories() {
     const res = await fetch(`${API}/api/categories`, {
       credentials: "include",
@@ -60,6 +78,7 @@ const [editLoc, setEditLoc] = useState({
     const fd = new FormData();
     fd.append("name", name);
     fd.append("price", price);
+    fd.append("discountPercent", discountPercent);
     fd.append("description", description);
     fd.append("categoryId", categoryId);
     fd.append("ageMin", ageMin);
@@ -84,6 +103,9 @@ const [editLoc, setEditLoc] = useState({
     // reset
     setName("");
     setPrice("");
+
+    setDiscountPercent("0");
+
     setDescription("");
     setCategoryId("");
     setAgeMin("0");
@@ -92,6 +114,66 @@ const [editLoc, setEditLoc] = useState({
     setIsNewArrival(false);
     setImage(null);
 
+    loadProducts();
+  }
+  function startEditProduct(p) {
+    setEditingProductId(p._id);
+    setEditProduct({
+      name: p.name || "",
+      price: String(p.price ?? ""),
+      description: p.description || "",
+      categoryId: p.categoryId || "",
+      ageMin: String(p.ageMin ?? "0"),
+      ageMax: String(p.ageMax ?? "99"),
+      isBestSeller: !!p.isBestSeller,
+      isNewArrival: !!p.isNewArrival,
+      discountPercent: String(p.discountPercent ?? "0"),
+    });
+  }
+  
+  function cancelEditProduct() {
+    setEditingProductId(null);
+  }
+  
+  async function saveEditProduct(id) {
+    const res = await fetch(`${API}/api/products/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        ...editProduct,
+        price: Number(editProduct.price),
+        ageMin: Number(editProduct.ageMin),
+        ageMax: Number(editProduct.ageMax),
+        discountPercent: Number(editProduct.discountPercent || 0),
+      }),
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Update product failed (${res.status}): ${text}`);
+      return;
+    }
+  
+    setEditingProductId(null);
+    loadProducts();
+  }
+  
+  async function deleteProduct(id) {
+    const ok = window.confirm("Delete this product?");
+    if (!ok) return;
+  
+    const res = await fetch(`${API}/api/products/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Delete product failed (${res.status}): ${text}`);
+      return;
+    }
+  
     loadProducts();
   }
 
@@ -211,6 +293,7 @@ const [editLoc, setEditLoc] = useState({
       <div style={{ display: "grid", gap: 10, maxWidth: 500 }}>
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
         <input placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
+        <input type="number" min="0" max="90"placeholder="Discount % (optional)" value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} />
         <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
 
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
@@ -245,17 +328,124 @@ const [editLoc, setEditLoc] = useState({
       <hr style={{ margin: "24px 0" }} />
 
       <h2>All Products</h2>
-      {products.map((p) => (
-        <div key={p._id} style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 10 }}>
+
+{products.map((p) => {
+  const isEditing = editingProductId === p._id;
+
+  return (
+    <div key={p._id} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 10 }}>
+      {!isEditing ? (
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           {p.image && <img src={`${API}${p.image}`} alt={p.name} width={60} />}
-          <div>
-            <div><b>{p.name}</b> — ${p.price}</div>
+
+          <div style={{ flex: 1 }}>
+            <div>
+              <b>{p.name}</b> — ${p.price}{" "}
+              {Number(p.discountPercent || 0) > 0 && (
+                <span style={{ marginLeft: 8, color: "crimson", fontWeight: "bold" }}>
+                  -{p.discountPercent}%
+                </span>
+              )}
+            </div>
+
             <div style={{ fontSize: 12 }}>
-              Age {p.ageMin}-{p.ageMax} | BestSeller: {String(p.isBestSeller)} | NewArrival: {String(p.isNewArrival)}
+              Age {p.ageMin}-{p.ageMax} | BestSeller: {String(p.isBestSeller)} | NewArrival:{" "}
+              {String(p.isNewArrival)} | Discount: {p.discountPercent || 0}%
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button onClick={() => startEditProduct(p)}>Edit</button>
+              <button onClick={() => deleteProduct(p._id)} style={{ color: "crimson" }}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
-      ))}
+      ) : (
+        <>
+          <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
+            <input
+              placeholder="Name"
+              value={editProduct.name}
+              onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
+            />
+
+            <input
+              placeholder="Price"
+              value={editProduct.price}
+              onChange={(e) => setEditProduct({ ...editProduct, price: e.target.value })}
+            />
+
+            <textarea
+              placeholder="Description"
+              value={editProduct.description}
+              onChange={(e) => setEditProduct({ ...editProduct, description: e.target.value })}
+            />
+
+            <select
+              value={editProduct.categoryId}
+              onChange={(e) => setEditProduct({ ...editProduct, categoryId: e.target.value })}
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <input
+                type="number"
+                placeholder="Age min"
+                value={editProduct.ageMin}
+                onChange={(e) => setEditProduct({ ...editProduct, ageMin: e.target.value })}
+              />
+              <input
+                type="number"
+                placeholder="Age max"
+                value={editProduct.ageMax}
+                onChange={(e) => setEditProduct({ ...editProduct, ageMax: e.target.value })}
+              />
+            </div>
+
+            <label>
+              <input
+                type="checkbox"
+                checked={editProduct.isBestSeller}
+                onChange={(e) => setEditProduct({ ...editProduct, isBestSeller: e.target.checked })}
+              />
+              Best Seller
+            </label>
+
+            <label>
+              <input
+                type="checkbox"
+                checked={editProduct.isNewArrival}
+                onChange={(e) => setEditProduct({ ...editProduct, isNewArrival: e.target.checked })}
+              />
+              New Arrival
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              max="90"
+              placeholder="Discount %"
+              value={editProduct.discountPercent}
+              onChange={(e) => setEditProduct({ ...editProduct, discountPercent: e.target.value })}
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <button onClick={() => saveEditProduct(p._id)}>Save</button>
+            <button onClick={cancelEditProduct}>Cancel</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+})}
       <hr style={{ margin: "24px 0" }} />
 
 <h1>Admin — Locations</h1>

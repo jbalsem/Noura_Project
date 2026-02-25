@@ -7,6 +7,16 @@ const { requireAuth, requireAdmin } = require("../middleware/auth");
 
 console.log("✅ products route registered");
 
+router.get("/deals", async (req, res) => {
+  const products = await Product.find({
+    isActive: true,
+    discountPercent: { $gt: 0 },
+  }).sort({ createdAt: -1 });
+
+  res.json(products);
+});
+
+
 // GET all products
 router.get("/", async (req, res) => {
     const {
@@ -54,8 +64,11 @@ router.post("/", requireAuth, requireAdmin, upload.single("image"), async (req, 
   
       isBestSeller: req.body.isBestSeller === "true",
       isNewArrival: req.body.isNewArrival === "true",
+
+      discountPercent: Number(req.body.discountPercent || 0),
   
       isActive: true
+      
     });
   
     res.json(product);

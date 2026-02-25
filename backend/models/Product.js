@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 
+
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     price: { type: Number, required: true },
+    discountPercent: { type: Number, default: 0 },
     description: { type: String, default: "" },
     image: { type: String, default: null },
     isActive: { type: Boolean, default: true },
@@ -16,6 +18,8 @@ const productSchema = new mongoose.Schema(
     // homepage sections
     isBestSeller: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false }
+
+    
   },
   { timestamps: true }
 );
