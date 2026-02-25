@@ -1,6 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useCart } from "../hooks/useCart";
+import logo from "../assets/logo.png";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
@@ -9,13 +10,13 @@ export default function Navbar() {
 
   async function fetchMe() {
     try {
-        const res = await fetch("http://localhost:5050/api/auth/me", {
-            credentials: "include",
-          });
+      const res = await fetch("http://localhost:5050/api/auth/me", {
+        credentials: "include",
+      });
       const json = await res.json();
       if (json.ok) setUser(json.user);
-    } catch (err) {
-      console.log("Not logged in");
+    } catch {
+      // not logged in
     }
   }
 
@@ -25,75 +26,76 @@ export default function Navbar() {
 
   async function handleLogout() {
     await fetch("http://localhost:5050/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+      method: "POST",
+      credentials: "include",
+    });
     setUser(null);
     navigate("/");
   }
 
   return (
-    <nav style={styles.nav}>
-      <Link to="/">Home</Link>
-      <Link to="/categories">Categories</Link>
-      <Link to="/deals">Deals</Link>
-      <Link to="/locations">Locations</Link>
-     
-      <Link to="/cart" style={{ position: "relative", textDecoration: "none" }}>
-  <span style={{ fontSize: 20 }}>🛒</span>
+    <header className="k-nav">
+      <div className="k-nav-inner">
+        <Link to="/" className="k-brand" aria-label="Kidooze Home">
+          <img src={logo} alt="Kidooze" className="k-brand-logo" />
+        </Link>
 
-  {count > 0 && (
-    <span
-      style={{
-        position: "absolute",
-        top: -8,
-        right: -10,
-        background: "crimson",
-        color: "white",
-        borderRadius: 999,
-        padding: "2px 6px",
-        fontSize: 12,
-        lineHeight: 1,
-      }}
-    >
-      {count}
-    </span>
-  )}
-</Link>
+        <nav className="k-links" aria-label="Main navigation">
+          <NavLink to="/" className={({ isActive }) => "k-link" + (isActive ? " active" : "")}>
+            Home
+          </NavLink>
+          <NavLink to="/categories" className={({ isActive }) => "k-link" + (isActive ? " active" : "")}>
+            Categories
+          </NavLink>
+          <NavLink to="/locations" className={({ isActive }) => "k-link" + (isActive ? " active" : "")}>
+            Location
+          </NavLink>
+          <NavLink to="/deals" className={({ isActive }) => "k-link" + (isActive ? " active" : "")}>
+            Deals
+          </NavLink>
 
+          {user?.role === "admin" && (
+            <NavLink to="/admin" className={({ isActive }) => "k-link" + (isActive ? " active" : "")}>
+              Admin
+            </NavLink>
+          )}
+        </nav>
 
-      <div style={styles.right}>
-        {user ? (
-          <>
-            <span>Hi, {user.first_name || user.email}</span>
-            <button onClick={handleLogout}>Sign out</button>
-            {user.role === "admin" && (<Link to="/admin">Admin</Link>
-        )}
-          </>
-        ) : (
-          <>
-            <Link to="/signin">Sign in</Link>
-            <span> / </span>
-            <Link to="/register">Register</Link>
-          </>
-        )}
+        <div className="k-spacer" />
+
+        <div className="k-search">
+          <span className="k-search-icon">🔍</span>
+          <input placeholder="Search toys..." />
+        </div>
+
+        <div className="k-iconbar">
+          <Link to="/cart" className="k-iconbtn" title="Cart" aria-label="Cart">
+            🛒
+            {count > 0 && <span className="k-badge">{count}</span>}
+          </Link>
+
+          <Link to={user ? "/account" : "/signin"} className="k-iconbtn" title="Account" aria-label="Account">
+            👤
+          </Link>
+        </div>
+
+        <div className="k-auth">
+          {user ? (
+            <>
+              <span className="k-hi">Hi, {user.first_name || user.email}</span>
+              <button className="k-pillbtn" onClick={handleLogout}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/signin" className="k-auth-link">Sign in</Link>
+              <span className="k-auth-sep">/</span>
+              <Link to="/register" className="k-auth-link">Register</Link>
+            </>
+          )}
+        </div>
       </div>
-    </nav>
+    </header>
   );
 }
-
-const styles = {
-  nav: {
-    display: "flex",
-    gap: 12,
-    alignItems: "center",
-    padding: "16px 24px",
-    borderBottom: "1px solid #ddd",
-  },
-  right: {
-    marginLeft: "auto",
-    display: "flex",
-    gap: 8,
-    alignItems: "center",
-  },
-};

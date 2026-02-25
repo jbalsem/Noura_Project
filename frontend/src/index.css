@@ -1,68 +1,453 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap");
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Fonts */
+body { font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+h1,h2,h3 { font-family: "Fredoka", system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+/* Home section title colors */
+.title-best {
+  color: var(--k-purple) !important;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+.title-new {
+  color: var(--k-orange) !important;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+.title-category {
+  color: var(--k-purple) !important;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Theme + palette (logo colors) */
+:root{
+  --bg: #FFF7EE;
+  --card: #ffffff;
+
+  /* NO BLACK: use soft ink */
+  --ink: #2B3A55;        /* deep slate-blue */
+  --muted: #5B6B86;      /* soft gray-blue */
+  --line: rgba(43,58,85,.10);
+
+  /* Logo palette */
+  --k-yellow: #F0B44B;
+  --k-teal:   #54B0A7;
+  --k-coral:  #E76359;
+  --k-purple: #B13DC4;
+  --k-orange: #EB6D3D;
+
+  /* Back-compat names you already use */
+  --yellow: var(--k-yellow);
+  --teal:   var(--k-teal);
+  --coral:  var(--k-coral);
+  --purple: var(--k-purple);
+  --orange: var(--k-orange);
+
+  --shadow: 0 10px 24px rgba(43,58,85,.10);
+  --radius: 18px;
+
+  /* navbar */
+  --nav-bg: rgba(214, 241, 255, .75);   /* soft sky */
+  --nav-pill: rgba(255,255,255,.92);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+
+/* ===== Per-page theme color ===== */
+/* Use: <div className="page theme-teal"> ... */
+.page{ min-height: 100vh; }
+.theme-teal   { --page-accent: var(--k-teal); }
+.theme-yellow { --page-accent: var(--k-yellow); }
+.theme-coral  { --page-accent: var(--k-coral); }
+.theme-purple { --page-accent: var(--k-purple); }
+.theme-orange { --page-accent: var(--k-orange); }
+
+/* Page titles automatically take the accent */
+.page h1,
+.page h2{
+  color: var(--page-accent, var(--ink));
+}
+
+/* ===== Big section titles ===== */
+.sectionTitleRow h2{
+  font-size: 40px;
+  margin-top: 80px;
+}
+
+/* Layout */
+.container{
+  width: 100%;
+  padding: 0 5vw;
+}
+
+/* Cards */
+.card{
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 2px solid rgba(43,58,85,.06);
+}
+
+/* Buttons */
+.btn{
+  border: none;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 900;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: transform .12s ease, filter .2s ease;
 }
-button:hover {
-  border-color: #646cff;
+.btn:hover{
+  filter: brightness(1.03);
+  transform: scale(1.06);              /* ✅ hover grows */
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.btn:active{ transform: scale(.98); }
+
+.btn-teal{ background: var(--teal); color: white; }
+.btn-orange{ background: var(--orange); color: white; }
+.btn-purple{ background: var(--purple); color: white; }
+
+/* Also make other clickable things grow */
+button, a.btn, .k-pillbtn, .k-iconbtn{
+  transition: transform .12s ease, filter .2s ease;
+}
+button:hover, a.btn:hover, .k-pillbtn:hover, .k-iconbtn:hover{
+  transform: scale(1.06);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Grid */
+.grid{
+  display: grid;
+  gap: 14px;
+}
+
+.productsGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+/* Product cards */
+.productCard{
+  padding: 22px;
+  border-radius: 22px;
+}
+
+.productImg{
+  height: 220px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.productCard h3{
+  font-size: 20px;
+}
+
+/* Badges */
+.badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  border: 2px solid rgba(43,58,85,.10);
+  background: rgba(255,255,255,.75);
+}
+
+/* Section title row */
+.sectionTitleRow{
+  display:flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* ===== Rainbow (logo-color) titles ===== */
+/* Use in Home hero or anywhere:
+   <h1 className="rainbowTitle"><span className="c1">PLAY.</span> ...</h1>
+*/
+.rainbowTitle{
+  font-size: clamp(44px, 5.6vw, 86px);
+  line-height: 1.02;
+  margin: 18px 0 10px;
+  letter-spacing: .3px;
+}
+.rainbowTitle .c1{ color: var(--k-yellow); }
+.rainbowTitle .c2{ color: var(--k-teal); }
+.rainbowTitle .c3{ color: var(--k-coral); }
+.rainbowTitle .c4{ color: var(--k-purple); }
+.rainbowTitle .c5{ color: var(--k-orange); }
+
+/* ===== Circular categories ===== */
+.categoryCircle{
+  text-decoration: none;
+  color: inherit;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  background: rgba(255,255,255,.90);
+  box-shadow: 0 12px 26px rgba(43,58,85,.08);
+  transition: transform .12s ease, filter .2s ease;
+}
+.categoryCircle:hover{
+  transform: scale(1.06);
+  filter: brightness(1.01);
+}
+.categoryCircle img{
+  width: 170px;
+  height: 170px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid rgba(43,58,85,.08);
+  background: #fff;
+}
+
+/* ===== NAVBAR (COMPACT) ===== */
+.k-nav{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(214, 241, 255, .78);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(43,58,85,.10);
+}
+
+.k-nav-inner{
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 18px;     /* smaller */
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.k-brand{ text-decoration: none; display:flex; align-items:center; }
+.k-brand-logo{
+  height: 52px;           /* bigger logo */
+  width: auto;
+  display: block;
+}
+
+.k-links{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.k-link{
+  text-decoration: none;      /* no underline */
+  font-weight: 900;
+  font-size: 16px;
+  color: #3B4A66;
+  padding: 8px 12px;
+  border-radius: 999px;
+  transition: background .15s ease, color .15s ease, transform .12s ease;
+}
+.k-link:hover{
+  background: rgba(84,176,167,.14);
+  color: #2B3A55;
+  transform: scale(1.06);
+}
+.k-link.active{
+  background: rgba(240,180,75,.22);
+  color: #2B3A55;
+}
+
+.k-spacer{ flex: 1; }
+
+.k-search{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(43,58,85,.10);
+  border-radius: 999px;
+  padding: 8px 12px;
+  min-width: 220px;
+}
+
+.k-search-icon{ opacity: .75; }
+
+.k-search input{
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  width: 100%;
+  font-weight: 800;
+  color: #2B3A55;
+}
+
+.k-iconbar{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.k-iconbtn{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(43,58,85,.10);
+  text-decoration: none;
+  color: #2B3A55;
+  position: relative;
+  font-size: 18px;
+}
+
+.k-badge{
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--k-coral);
+  color: white;
+  border-radius: 999px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 2px solid rgba(255,255,255,.95);
+}
+
+.k-auth{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 6px;
+  font-weight: 800;
+  color: #3B4A66;
+  white-space: nowrap;
+}
+
+.k-hi{
+  color: #2B3A55;
+  font-weight: 900;
+}
+
+.k-auth-link{
+  text-decoration: none;
+  font-weight: 900;
+  color: #3B4A66;
+}
+.k-auth-link:hover{ color: #2B3A55; transform: scale(1.06); }
+
+.k-auth-sep{ opacity: .6; }
+
+.k-pillbtn{
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(177,61,196,.14);
+  color: #2B3A55;
+}
+
+@media (max-width: 980px){
+  .k-links{ display:none; }
+  .k-search{ flex: 1; min-width: 0; }
+}
+@media (max-width: 560px){
+  .k-search{ display:none; }
+  .k-auth{ display:none; }
+}
+
+/* ===== HERO (if you still use these classes anywhere) ===== */
+.hero{
+  width: 100%;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8vw;
+  background: linear-gradient(
+    135deg,
+    #54B0A7 0%,
+    #F0B44B 40%,
+    #EB6D3D 70%
+  );
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content{
+  max-width: 600px;
+}
+
+.hero h1{
+  font-size: clamp(48px, 6vw, 90px);
+  line-height: 1.05;
+  margin: 0 0 20px;
+}
+
+.hero p{
+  font-size: 22px;
+  margin-bottom: 30px;
+}
+
+.hero-btn{
+  background: white;
+  color: #2B3A55;
+  padding: 16px 32px;
+  font-size: 20px;
+  font-weight: 900;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(0,0,0,.2);
+}
+
+.hero-logo{
+  width: 400px;
+  max-width: 40vw;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,.3));
+}
+
+
+
+/* ===== Category full circle image ===== */
+
+.categoryCircleImage{
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;              /* makes image perfectly circular */
+  margin: 0 auto;
+  box-shadow: 0 12px 26px rgba(43,58,85,.12);
+  border: 4px solid var(--k-yellow);
+  transition: transform .2s ease;
+}
+
+.categoryCircleImage:hover{
+  transform: scale(1.07);
+}
+
+.categoryCircleImage img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;             /* fills the circle fully */
+  display: block;
+}
+
+/* Category name under circle */
+.categoryLabel{
+  margin-top: 14px;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--k-teal);
 }
