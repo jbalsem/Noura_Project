@@ -11,7 +11,8 @@ import SignIn from "./pages/SignIn";
 import Register from "./pages/Register";
 import AdminRoute from "./components/AdminRoute";
 import AdminCategories from "./pages/AdminCategories";
-
+import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 
 
 
@@ -31,6 +32,8 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
         <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/checkout-success" element={<CheckoutSuccess />} />
       </Routes>
 
     </BrowserRouter>

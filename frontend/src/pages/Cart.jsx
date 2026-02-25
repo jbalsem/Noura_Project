@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../hooks/useCart";
+import { useNavigate } from "react-router-dom";
 
 const API = "http://localhost:5050";
 
@@ -10,6 +11,7 @@ function money(n) {
 export default function Cart() {
   const { items, setQty, remove, clear } = useCart();
   const [settings, setSettings] = useState({ shippingFee: 0, taxPercent: 0 });
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${API}/api/settings`)
@@ -126,11 +128,11 @@ export default function Cart() {
             </div>
 
             <button
-              style={{ marginTop: 12, width: "100%" }}
-              onClick={() => alert("Checkout coming next 🙂")}
-            >
-              Checkout
-            </button>
+  style={{ marginTop: 12, width: "100%" }}
+  onClick={() => navigate("/checkout")}
+>
+  Checkout
+</button>
 
             <button style={{ marginTop: 8, width: "100%" }} onClick={clear}>
               Clear cart
