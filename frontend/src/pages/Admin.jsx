@@ -640,6 +640,128 @@ const [heroOrder, setHeroOrder] = useState("0");
   );
 })}
 <hr style={{ margin: "24px 0" }} />
+<h1>Admin — Locations</h1>
+
+<div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
+  <input placeholder="Location name" value={locName} onChange={(e) => setLocName(e.target.value)} />
+  <input placeholder="Address 1" value={address1} onChange={(e) => setAddress1(e.target.value)} />
+  <input placeholder="Address 2 (optional)" value={address2} onChange={(e) => setAddress2(e.target.value)} />
+  <div style={{ display: "flex", gap: 10 }}>
+    <input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} style={{ flex: 1 }} />
+    <input placeholder="State" value={stateProv} onChange={(e) => setStateProv(e.target.value)} style={{ width: 110 }} />
+    <input placeholder="Zip" value={zip} onChange={(e) => setZip(e.target.value)} style={{ width: 120 }} />
+  </div>
+  <input placeholder="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
+  <input placeholder="Hours (optional)" value={hours} onChange={(e) => setHours(e.target.value)} />
+  <input placeholder="Google Maps URL (optional)" value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} />
+
+  <button onClick={addLocation} disabled={!locName || !address1 || !city}>
+    Add Location
+  </button>
+</div>
+
+<hr style={{ margin: "24px 0" }} />
+
+<h2>All Locations</h2>
+
+{locations.length === 0 ? (
+  <div>No locations yet.</div>
+) : (
+  <div style={{ display: "grid", gap: 12 }}>
+    {locations.map((l) => {
+      const isEditing = editingId === l._id;
+
+      return (
+        <div key={l._id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12, background: "#fff" }}>
+          {!isEditing ? (
+            <>
+              <div style={{ fontWeight: "bold" }}>{l.name}</div>
+              <div style={{ fontSize: 13, color: "#555", marginTop: 4 }}>
+                {l.address1}{l.address2 ? `, ${l.address2}` : ""}
+              </div>
+              <div style={{ fontSize: 13, color: "#555" }}>
+                {l.city}{l.state ? `, ${l.state}` : ""} {l.zip}
+              </div>
+              {l.phone && <div style={{ fontSize: 13, marginTop: 4 }}>📞 {l.phone}</div>}
+              {l.hours && <div style={{ fontSize: 13 }}>🕒 {l.hours}</div>}
+              {l.mapUrl && (
+                <div style={{ fontSize: 13, marginTop: 6 }}>
+                  <a href={l.mapUrl} target="_blank" rel="noreferrer">View on Google Maps</a>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => startEdit(l)}>Edit</button>
+                <button onClick={() => deleteLocation(l._id)} style={{ color: "crimson" }}>Delete</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ display: "grid", gap: 8 }}>
+                <input
+                  placeholder="Location name"
+                  value={editLoc.name}
+                  onChange={(e) => setEditLoc({ ...editLoc, name: e.target.value })}
+                />
+                <input
+                  placeholder="Address 1"
+                  value={editLoc.address1}
+                  onChange={(e) => setEditLoc({ ...editLoc, address1: e.target.value })}
+                />
+                <input
+                  placeholder="Address 2"
+                  value={editLoc.address2}
+                  onChange={(e) => setEditLoc({ ...editLoc, address2: e.target.value })}
+                />
+                <div style={{ display: "flex", gap: 10 }}>
+                  <input
+                    placeholder="City"
+                    value={editLoc.city}
+                    onChange={(e) => setEditLoc({ ...editLoc, city: e.target.value })}
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    placeholder="State"
+                    value={editLoc.state}
+                    onChange={(e) => setEditLoc({ ...editLoc, state: e.target.value })}
+                    style={{ width: 110 }}
+                  />
+                  <input
+                    placeholder="Zip"
+                    value={editLoc.zip}
+                    onChange={(e) => setEditLoc({ ...editLoc, zip: e.target.value })}
+                    style={{ width: 120 }}
+                  />
+                </div>
+                <input
+                  placeholder="Phone"
+                  value={editLoc.phone}
+                  onChange={(e) => setEditLoc({ ...editLoc, phone: e.target.value })}
+                />
+                <input
+                  placeholder="Hours"
+                  value={editLoc.hours}
+                  onChange={(e) => setEditLoc({ ...editLoc, hours: e.target.value })}
+                />
+                <input
+                  placeholder="Google Maps URL"
+                  value={editLoc.mapUrl}
+                  onChange={(e) => setEditLoc({ ...editLoc, mapUrl: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => saveEdit(l._id)}>Save</button>
+                <button onClick={cancelEdit}>Cancel</button>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    })}
+  </div>
+)}
+<hr style={{ margin: "24px 0" }} />
 <h1>Admin — Sales Dashboard</h1>
 
 {!stats ? (
