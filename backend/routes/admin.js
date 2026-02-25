@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
+const { requireAuth, requireAdmin } = require("../middleware/auth");
 
 // NOTE: later we can protect with admin auth middleware
 
-router.get("/orders", async (req, res) => {
+
+
+
+router.get("/orders", requireAuth, requireAdmin, async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
     res.json(orders);
@@ -14,7 +18,7 @@ router.get("/orders", async (req, res) => {
   }
 });
 
-router.patch("/orders/:id/status", async (req, res) => {
+router.patch("/orders/:id/status", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const allowed = ["received", "delivered", "returned", "canceled"];
@@ -36,7 +40,7 @@ router.patch("/orders/:id/status", async (req, res) => {
   }
 });
 
-router.get("/stats", async (req, res) => {
+router.get("/stats", requireAuth, requireAdmin, async (req, res) => {
   try {
     // Revenue = delivered only
     const deliveredOrders = await Order.find({ status: "delivered" });
@@ -84,5 +88,6 @@ router.get("/stats", async (req, res) => {
     res.status(500).json({ error: "Failed to load stats" });
   }
 });
+
 
 module.exports = router;

@@ -4,6 +4,7 @@ const Product = require("../models/Product");
 const router = express.Router();
 const upload = require("../middleware/upload");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
+const mongoose = require("mongoose");
 
 console.log("✅ products route registered");
 
@@ -29,7 +30,7 @@ router.get("/", async (req, res) => {
   
     const q = { isActive: true };
   
-    if (categoryId) q.categoryId = categoryId;
+    if (categoryId) q.categoryId = new mongoose.Types.ObjectId(categoryId);
   
     if (minPrice || maxPrice) {
       q.price = {};

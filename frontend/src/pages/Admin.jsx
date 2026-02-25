@@ -64,6 +64,10 @@ const [orders, setOrders] = useState([]);
 const [stats, setStats] = useState(null);
 
 
+const [heroAll, setHeroAll] = useState([]);
+const [heroImage, setHeroImage] = useState(null);
+const [heroOrder, setHeroOrder] = useState("0");
+
   async function loadCategories() {
     const res = await fetch(`${API}/api/categories`, {
       credentials: "include",
@@ -352,6 +356,66 @@ const [stats, setStats] = useState(null);
     // refresh stats too
     loadStats();
   }
+
+  async function loadHeroSlides() {
+    const res = await fetch(`${API}/api/hero-slides/all`, { credentials: "include" });
+    const text = await res.text();
+    if (!res.ok) { console.log(text); return; }
+    setHeroAll(JSON.parse(text));
+  }
+  
+  async function uploadHeroSlide() {
+    if (!heroImage) return;
+  
+    const fd = new FormData();
+    fd.append("image", heroImage);
+    fd.append("order", heroOrder);
+  
+    const res = await fetch(`${API}/api/hero-slides/upload`, {
+      method: "POST",
+      credentials: "include",
+      body: fd,
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Upload failed (${res.status}): ${text}`);
+      return;
+    }
+  
+    setHeroImage(null);
+    setHeroOrder("0");
+    loadHeroSlides();
+  }
+  
+  async function toggleHeroSlide(id) {
+    await fetch(`${API}/api/hero-slides/${id}/toggle`, {
+      method: "PATCH",
+      credentials: "include",
+    });
+    loadHeroSlides();
+  }
+  
+  async function changeHeroOrder(id, order) {
+    await fetch(`${API}/api/hero-slides/${id}/order`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ order }),
+    });
+    loadHeroSlides();
+  }
+  
+  async function deleteHeroSlide(id) {
+    const ok = window.confirm("Delete this hero image?");
+    if (!ok) return;
+  
+    await fetch(`${API}/api/hero-slides/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    loadHeroSlides();
+  }
   useEffect(() => {
     loadCategories();
     loadProducts();
@@ -360,14 +424,63 @@ const [stats, setStats] = useState(null);
 
     loadOrders();
   loadStats();
+  loadHeroSlides();
   }, []);
  
 
   return (
+    
+    
     <div style={{ padding: 24 }}>
       <h1>Admin — Products</h1>
       <div style={{ marginBottom: 16 }}>
   <a href="/admin/categories">Manage Categories</a>
+</div>
+<hr style={{ margin: "24px 0" }} />
+<h1>Admin — Hero Slideshow</h1>
+
+<div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
+  <input
+    type="number"
+    placeholder="Order (0 = first)"
+    value={heroOrder}
+    onChange={(e) => setHeroOrder(e.target.value)}
+  />
+  <input type="file" accept="image/*" onChange={(e) => setHeroImage(e.target.files[0])} />
+  <button onClick={uploadHeroSlide} disabled={!heroImage}>
+    Upload Hero Image
+  </button>
+</div>
+
+<div style={{ marginTop: 16, display: "grid", gap: 10 }}>
+  {heroAll.map((s) => (
+    <div key={s._id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12, background: "#fff", display: "flex", gap: 12, alignItems: "center" }}>
+      <img src={`${API}${s.image}`} alt="" width={90} style={{ borderRadius: 10, objectFit: "cover" }} />
+
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: "bold" }}>
+          Order: {s.order} — Active: {String(s.active)}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+          <button onClick={() => toggleHeroSlide(s._id)}>
+            {s.active ? "Disable" : "Enable"}
+          </button>
+
+          <button onClick={() => changeHeroOrder(s._id, Number(s.order) - 1)}>
+            ↑ order
+          </button>
+          <button onClick={() => changeHeroOrder(s._id, Number(s.order) + 1)}>
+            ↓ order
+          </button>
+
+          <button onClick={() => deleteHeroSlide(s._id)} style={{ color: "crimson" }}>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
 </div>
 
       <div style={{ display: "grid", gap: 10, maxWidth: 500 }}>

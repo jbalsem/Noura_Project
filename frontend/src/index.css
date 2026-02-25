@@ -5,7 +5,7 @@ body { font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial;
 h1,h2,h3 { font-family: "Fredoka", system-ui, -apple-system, Segoe UI, Roboto, Arial; }
 /* Home section title colors */
 .title-best {
-  color: var(--k-purple) !important;
+  color: var(--k-teal) !important;
 }
 
 .title-new {
@@ -67,8 +67,9 @@ body{
 .theme-orange { --page-accent: var(--k-orange); }
 
 /* Page titles automatically take the accent */
-.page h1,
-.page h2{
+/* Only auto-color titles that are direct page headings */
+.page > h1,
+.page > h2{
   color: var(--page-accent, var(--ink));
 }
 
@@ -176,16 +177,26 @@ button:hover, a.btn:hover, .k-pillbtn:hover, .k-iconbtn:hover{
    <h1 className="rainbowTitle"><span className="c1">PLAY.</span> ...</h1>
 */
 .rainbowTitle{
-  font-size: clamp(44px, 5.6vw, 86px);
-  line-height: 1.02;
-  margin: 18px 0 10px;
-  letter-spacing: .3px;
+  font-size: clamp(34px, 3.5vw, 54px);
+  line-height: 1.05;
+  margin: 8px 0 4px;
+  letter-spacing: .5px;
+  font-weight: 900;
+
+  /* ✅ this is the real color */
+  color: var(--k-yellow);
+
+  text-shadow: 0 10px 32px rgba(0,0,0,.34);
 }
-.rainbowTitle .c1{ color: var(--k-yellow); }
-.rainbowTitle .c2{ color: var(--k-teal); }
-.rainbowTitle .c3{ color: var(--k-coral); }
-.rainbowTitle .c4{ color: var(--k-purple); }
-.rainbowTitle .c5{ color: var(--k-orange); }
+
+/* ✅ force spans to follow the yellow too */
+.rainbowTitle .c1,
+.rainbowTitle .c2,
+.rainbowTitle .c3,
+.rainbowTitle .c4,
+.rainbowTitle .c5{
+  color: inherit !important;
+}
 
 /* ===== Circular categories ===== */
 .categoryCircle{
@@ -368,56 +379,192 @@ button:hover, a.btn:hover, .k-pillbtn:hover, .k-iconbtn:hover{
 }
 
 /* ===== HERO (if you still use these classes anywhere) ===== */
-.hero{
-  width: 100%;
-  min-height: 85vh;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8vw;
-  background: linear-gradient(
-    135deg,
-    #54B0A7 0%,
-    #F0B44B 40%,
-    #EB6D3D 70%
-  );
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
+/* =========================
+   HERO (Slideshow + Overlay)
+   ========================= */
 
-.hero-content{
-  max-width: 600px;
-}
+   .k-hero{
+    position: relative;
+    width: 100%;
+    min-height: 80vh;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(43,58,85,.10);
+  }
+  
+  /* Slideshow layers */
+  .k-hero-slides{
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  
+  .k-hero-slide{
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.03);
+    transition: opacity 900ms ease, transform 1200ms ease;
+    filter: saturate(1.05) contrast(1.02);
+  }
+  
+  .k-hero-slide.is-active{
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  /* ✅ No square/card — smooth fade like ToysRUs (right side darker) */
+  .k-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:1;
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0.12) 45%,
+      rgba(0,0,0,0.34) 75%,
+      rgba(0,0,0,0.55) 100%
+    );
+  }
+  
+  /* Overlay content (bottom-right) */
+  .k-hero-overlay{
+    position: relative;
+    z-index: 2;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;   /* push down */
+    align-items: flex-end;       /* push right */
+    padding: 58px 6vw;
+    text-align: right;
+    gap: 14px;
+  }
+  
+  /* Logo above title */
+  .k-hero-logoTop{
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  
+ 
+  
+  /* Badge (Fun toys • Happy kids) */
+  .k-hero-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.86);
+    border: 1px solid rgba(255,255,255,.35);
+    font-weight: 900;
+    color: #2B3A55;
+    box-shadow: 0 10px 22px rgba(0,0,0,.12);
+  }
+  
+ 
+  
+  .k-hero-text{
+    margin: 0;
+    font-size: clamp(18px, 1.6vw, 24px);
+    color: rgba(255,255,255,.97);
+    max-width: 720px;
+    font-weight: 800;
+    text-shadow: 0 6px 20px rgba(0,0,0,.35);
+  }
+  
+  /* Buttons row */
+  .k-hero-actions{
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+  
+  .k-hero-btn{
+    text-decoration: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    border: 2px solid rgba(255,255,255,.45);
+    transition: transform .12s ease, filter .2s ease;
+  }
+  
+  .k-hero-btn:hover{
+    transform: scale(1.06);
+  }
+  
+  .k-hero-btn.primary{
+    background: white;
+    color: #2B3A55;
+    border-color: transparent;
+  }
+  
+  .k-hero-btn.ghost{
+    background: rgba(255,255,255,.18);
+    color: white;
+  }
+  
+  /* Footer line under buttons */
+  .k-hero-safe{
+    margin-top: 10px;
+    font-weight: 900;
+    color: rgba(255,255,255,.95);
+    text-shadow: 0 6px 20px rgba(0,0,0,.28);
+  }
+  
+  /* Mobile */
+  @media (max-width: 760px){
+    .k-hero-overlay{
+      align-items: flex-start;
+      text-align: left;
+      padding: 56px 6vw;
+    }
+    .k-hero-actions{
+      justify-content: flex-start;
+    }
+    .k-hero-logoTop{
+      justify-content: flex-start;
+    }
+  }
 
-.hero h1{
-  font-size: clamp(48px, 6vw, 90px);
-  line-height: 1.05;
-  margin: 0 0 20px;
-}
 
-.hero p{
-  font-size: 22px;
-  margin-bottom: 30px;
-}
 
-.hero-btn{
-  background: white;
-  color: #2B3A55;
-  padding: 16px 32px;
-  font-size: 20px;
+
+
+/* logo bottom right */
+.k-hero-logoRow{
+  margin-top: 10px;
+  display:flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.k-hero-logo{
+  width: min(360px, 36vw);
+  max-width: 70vw;
+  filter: drop-shadow(0 22px 40px rgba(0,0,0,.35));
+}
+.k-hero-safe{
   font-weight: 900;
-  border-radius: 999px;
-  text-decoration: none;
-  box-shadow: 0 12px 30px rgba(0,0,0,.2);
+  color: rgba(255,255,255,.95);
 }
 
-.hero-logo{
-  width: 400px;
-  max-width: 40vw;
-  filter: drop-shadow(0 20px 40px rgba(0,0,0,.3));
+/* mobile */
+@media (max-width: 760px){
+  .k-hero-overlay{
+    align-items: flex-start;
+    text-align: left;
+  }
+  .k-hero-actions{ justify-content:flex-start; }
+  .k-hero-logoRow{ align-items:flex-start; }
 }
-
 
 
 /* ===== Category full circle image ===== */
@@ -450,4 +597,112 @@ button:hover, a.btn:hover, .k-pillbtn:hover, .k-iconbtn:hover{
   font-weight: 900;
   font-size: 18px;
   color: var(--k-teal);
+}
+
+
+/* categories page css */
+/* Kid purple page background */
+.theme-kidpurple{
+  --page-accent: var(--k-purple);
+  background: #F4E9FF; /* light purple */
+}
+
+/* Make page background apply */
+.page.theme-kidpurple{
+  background: #F4E9FF;
+}
+
+/* Categories page layout */
+.k-cats{
+  padding: 34px 5vw 70px;
+}
+
+.k-cats-title{
+  font-size: clamp(42px, 5vw, 68px);
+  margin: 10px 0 8px;
+  color: var(--k-purple);
+  text-shadow: 0 10px 28px rgba(0,0,0,.10);
+}
+
+.k-cats-sub{
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 800;
+  color: rgba(43,58,85,.80);
+  margin: 0 0 22px;
+}
+
+/* BIG FUN grid */
+.k-cats-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+  margin-top: 18px;
+}
+
+/* Big fun category card */
+.k-catCard{
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255,255,255,.90);
+  border: 2px solid rgba(43,58,85,.08);
+  border-radius: 26px;
+  box-shadow: 0 16px 34px rgba(43,58,85,.12);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  transition: transform .12s ease, filter .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.k-catCard:hover{
+  transform: scale(1.04);
+  filter: brightness(1.02);
+}
+
+/* Cute shine */
+.k-catCard::before{
+  content:"";
+  position:absolute;
+  inset:-40% -30%;
+  background: radial-gradient(circle at 30% 30%, rgba(240,180,75,.25), transparent 55%);
+  transform: rotate(12deg);
+  pointer-events:none;
+}
+
+/* BIG circle image */
+.k-catImgWrap{
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.k-catImg{
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 6px solid rgba(177,61,196,.25);
+  box-shadow: 0 18px 34px rgba(43,58,85,.16);
+  background: white;
+}
+
+.k-catName{
+  font-size: 24px;
+  font-weight: 900;
+  text-align: center;
+  color: #2B3A55;
+}
+
+.k-catHint{
+  text-align: center;
+  font-weight: 800;
+  color: rgba(43,58,85,.70);
+  margin-top: -6px;
+}
+
+/* mobile */
+@media (max-width: 520px){
+  .k-catImg{ width: 190px; height: 190px; }
+  .k-catName{ font-size: 22px; }
 }

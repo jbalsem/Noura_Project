@@ -15,6 +15,24 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const { add } = useCart();
 
+  const [heroSlides, setHeroSlides] = useState([]);
+const [slideIndex, setSlideIndex] = useState(0);
+
+useEffect(() => {
+  fetch(`${API}/api/hero-slides`)
+    .then((r) => r.json())
+    .then(setHeroSlides)
+    .catch(console.error);
+}, []);
+
+useEffect(() => {
+  if (!heroSlides.length) return;
+  const t = setInterval(() => {
+    setSlideIndex((i) => (i + 1) % heroSlides.length);
+  }, 4000);
+  return () => clearInterval(t);
+}, [heroSlides]);
+
   useEffect(() => {
     fetch(`${API}/api/products?section=bestSeller`)
       .then((r) => r.json())
@@ -35,136 +53,65 @@ export default function Home() {
   return (
     <div className="page theme-teal" style={{ width: "100%" }}>
       {/* FULL WIDTH HERO */}
-      <section
+      <section className="k-hero">
+  {/* slideshow bg */}
+  <div className="k-hero-slides">
+    {heroSlides.map((s, i) => (
+      <div
+        key={s._id}
+        className={`k-hero-slide ${i === slideIndex ? "is-active" : ""}`}
         style={{
-          width: "100%",
-          minHeight: "80vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 28,
-          padding: "40px 6vw",
-          position: "relative",
-          overflow: "hidden",
-          background:
-            "linear-gradient(135deg, rgba(84,176,167,.95) 0%, rgba(240,180,75,.95) 40%, rgba(235,109,61,.95) 75%)",
+          backgroundImage: `url(${API}${s.image})`,
         }}
-      >
-        {/* subtle shapes */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            background:
-              "radial-gradient(circle at 15% 25%, rgba(255,255,255,.20), transparent 45%)," +
-              "radial-gradient(circle at 85% 20%, rgba(177,61,196,.18), transparent 45%)," +
-              "radial-gradient(circle at 60% 85%, rgba(255,255,255,.18), transparent 55%)",
-          }}
-        />
+      />
+    ))}
+  </div>
 
-        <div style={{ position: "relative", maxWidth: 720 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              gap: 8,
-              alignItems: "center",
-              padding: "10px 14px",
-              borderRadius: 999,
-              background: "rgba(255,255,255,.85)",
-              fontWeight: 900,
-              color: "#2B3A55",
-            }}
-          >
-            🎁 Fun toys • Happy kids
-          </div>
+  {/* overlay content (bottom-right like screenshot) */}
+  <div className="k-hero-overlay">
+  <div className="k-hero-panel">
+    {/* ✅ LOGO moved to top */}
+    <div className="k-hero-badge">🎁 Fun toys • Happy kids</div>
+    <div className="k-hero-logoTop" style={{ display: "flex", justifyContent: "flex-end" }}>
+      <img
+        src={logo}
+        alt="Kidooze logo"
+        style={{
+          width: 400,
+          maxWidth: "45vw",
+          filter: "drop-shadow(0 14px 26px rgba(0,0,0,.25))",
+          marginBottom: 10,
+        }}
+      />
+    </div>
 
-          <h1 className="rainbowTitle">
-  <span className="c1">PLAY.</span>{" "}
-  <span className="c2">DISCOVER.</span>
-  <br />
-  <span className="c4">IMAGINE.</span>
-</h1>
+   
 
-          <p
-            style={{
-              margin: 0,
-              fontSize: "clamp(18px, 1.6vw, 24px)",
-              color: "rgba(255,255,255,.92)",
-              maxWidth: 620,
-              fontWeight: 700,
-            }}
-          >
-            Discover best sellers, new arrivals, and colorful categories. Add to cart in one tap and
-            we’ll confirm your order on WhatsApp.
-          </p>
+    <h1 className="rainbowTitle" style={{ marginTop: 10 }}>
+      <span className="c1">PLAY.</span>{" "}
+      <span className="c2">DISCOVER.</span>
+      <br />
+      <span className="c4">IMAGINE.</span>
+    </h1>
 
-          <div style={{ display: "flex", gap: 14, marginTop: 22, flexWrap: "wrap" }}>
-            <Link
-              to="/categories"
-              className="btn btn-teal"
-              style={{
-                textDecoration: "none",
-                padding: "16px 22px",
-                fontSize: 18,
-                borderRadius: 999,
-                background: "white",
-                color: "#2B3A55",
-                fontWeight: 900,
-              }}
-            >
-              Shop Categories
-            </Link>
+    <p className="k-hero-text">
+      Discover best sellers, new arrivals, and colorful categories. Add to cart in one tap and
+      we’ll confirm your order on WhatsApp.
+    </p>
 
-            <Link
-              to="/deals"
-              style={{
-                textDecoration: "none",
-                padding: "16px 22px",
-                fontSize: 18,
-                borderRadius: 999,
-                background: "rgba(255,255,255,.18)",
-                color: "white",
-                fontWeight: 900,
-                border: "2px solid rgba(255,255,255,.45)",
-              }}
-            >
-              See Deals
-            </Link>
+    <div className="k-hero-actions">
+      <Link to="/categories" className="k-hero-btn primary">Shop Categories</Link>
+      <Link to="/deals" className="k-hero-btn ghost">See Deals</Link>
+      <Link to="/locations" className="k-hero-btn ghost">Find Stores</Link>
+    </div>
 
-            <Link
-              to="/locations"
-              style={{
-                textDecoration: "none",
-                padding: "16px 22px",
-                fontSize: 18,
-                borderRadius: 999,
-                background: "rgba(255,255,255,.18)",
-                color: "white",
-                fontWeight: 900,
-                border: "2px solid rgba(255,255,255,.45)",
-              }}
-            >
-              Find Stores
-            </Link>
-          </div>
-        </div>
+    <div style={{ marginTop: 10, fontWeight: 900, color: "rgba(255,255,255,.95)" }}>
+      Safe • Colorful • Kid-friendly
+    </div>
+  </div>
 
-        <div style={{ position: "relative", textAlign: "center", minWidth: 280 }}>
-          <img
-            src={logo}
-            alt="Kidooze logo"
-            style={{
-              width: "min(520px, 36vw)",
-              maxWidth: "90vw",
-              filter: "drop-shadow(0 22px 40px rgba(0,0,0,.25))",
-            }}
-          />
-          <div style={{ marginTop: 12, fontWeight: 900, color: "rgba(255,255,255,.95)" }}>
-            Safe • Colorful • Kid-friendly
-          </div>
-        </div>
-      </section>
+  </div>
+</section>
 
       {/* CONTENT SECTIONS */}
       <div className="container" style={{ paddingTop: 30, paddingBottom: 60 }}>
@@ -178,7 +125,9 @@ export default function Home() {
             marginTop: 10,
           }}
         >
-          <h2 style={{ fontSize: 40, margin: 0 }}>Best Sellers ⭐</h2>
+          <h2 className="title-best" style={{ fontSize: 40, margin: 0 }}>
+  Best Sellers ⭐
+</h2>
           <Link
             to="/categories"
             style={{

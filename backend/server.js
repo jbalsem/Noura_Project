@@ -38,6 +38,8 @@ app.use("/api/orders", require("./routes/orders"));
 
 app.use("/api/admin", require("./routes/admin"));
 
+app.use("/api/hero-slides", require("./routes/heroSlides"));
+
 mongoose
   .connect(
     "mongodb+srv://kidooze_user:NouraAli2026@cluster0.td7vamp.mongodb.net/toystore?retryWrites=true&w=majority"
