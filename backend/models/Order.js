@@ -27,7 +27,11 @@ const OrderSchema = new mongoose.Schema(
       total: Number,
       taxPercent: Number,
     },
-    status: { type: String, default: "pending" }, // pending/confirmed/cancelled
+    status: {
+        type: String,
+        enum: ["received", "delivered", "returned", "canceled"],
+        default: "received",
+      },
   },
   { timestamps: true }
 );

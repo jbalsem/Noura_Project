@@ -60,6 +60,9 @@ const [discountPercent, setDiscountPercent] = useState("0");
 const [shippingFee, setShippingFee] = useState("5");
 const [taxPercent, setTaxPercent] = useState("8");
 
+const [orders, setOrders] = useState([]);
+const [stats, setStats] = useState(null);
+
 
   async function loadCategories() {
     const res = await fetch(`${API}/api/categories`, {
@@ -206,7 +209,7 @@ const [taxPercent, setTaxPercent] = useState("8");
   
     alert("Settings saved!");
   }
-  
+
 
   async function loadLocations() {
     const res = await fetch(`${API}/api/locations`, {
@@ -307,11 +310,56 @@ const [taxPercent, setTaxPercent] = useState("8");
   
     loadLocations();
   }
+
+  function money(n) {
+    return Number(n || 0).toFixed(2);
+  }
+  
+  async function loadOrders() {
+    const res = await fetch(`${API}/api/admin/orders`, {
+      credentials: "include",
+    });
+    setOrders(await res.json());
+  }
+  
+  async function loadStats() {
+    const res = await fetch(`${API}/api/admin/stats`, {
+      credentials: "include",
+    });
+    setStats(await res.json());
+  }
+  
+  async function updateOrderStatus(orderId, status) {
+    // optimistic update
+    setOrders((prev) =>
+      prev.map((o) => (o._id === orderId ? { ...o, status } : o))
+    );
+  
+    const res = await fetch(`${API}/api/admin/orders/${orderId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ status }),
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Update status failed (${res.status}): ${text}`);
+      loadOrders();
+      return;
+    }
+  
+    // refresh stats too
+    loadStats();
+  }
   useEffect(() => {
     loadCategories();
     loadProducts();
     loadLocations();
     loadSettings();
+
+    loadOrders();
+  loadStats();
   }, []);
  
 
@@ -479,99 +527,158 @@ const [taxPercent, setTaxPercent] = useState("8");
   );
 })}
 <hr style={{ margin: "24px 0" }} />
-<h1>Admin — Store Settings</h1>
+<h1>Admin — Sales Dashboard</h1>
 
-<div style={{ display: "grid", gap: 10, maxWidth: 320 }}>
-  <input
-    type="number"
-    step="0.01"
-    value={shippingFee}
-    onChange={(e) => setShippingFee(e.target.value)}
-    placeholder="Shipping fee"
-  />
-  <input
-    type="number"
-    step="0.01"
-    value={taxPercent}
-    onChange={(e) => setTaxPercent(e.target.value)}
-    placeholder="Tax percent"
-  />
-  <button onClick={saveSettings}>Save Shipping & Tax</button>
-</div>
-      <hr style={{ margin: "24px 0" }} />
+{!stats ? (
+  <div>Loading stats...</div>
+) : (
+  <>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+      <div style={cardStyle}>
+        <div style={cardLabel}>Revenue (Delivered)</div>
+        <div style={cardValue}>${money(stats.revenue)}</div>
+      </div>
 
-<h1>Admin — Locations</h1>
+      <div style={cardStyle}>
+        <div style={cardLabel}>Orders Sold (Delivered)</div>
+        <div style={cardValue}>{stats.ordersSold}</div>
+      </div>
 
-<div style={{ display: "grid", gap: 10, maxWidth: 500 }}>
-  <input placeholder="Store name" value={locName} onChange={(e) => setLocName(e.target.value)} />
-  <input placeholder="Address line 1" value={address1} onChange={(e) => setAddress1(e.target.value)} />
-  <input placeholder="Address line 2 (optional)" value={address2} onChange={(e) => setAddress2(e.target.value)} />
-  <input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-  <input placeholder="State" value={stateProv} onChange={(e) => setStateProv(e.target.value)} />
-  <input placeholder="ZIP" value={zip} onChange={(e) => setZip(e.target.value)} />
-  <input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-  <input placeholder="Hours (ex: Mon–Fri 9-5)" value={hours} onChange={(e) => setHours(e.target.value)} />
-  <input placeholder="Google Maps link (optional)" value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} />
+      <div style={cardStyle}>
+        <div style={cardLabel}>Total Orders</div>
+        <div style={cardValue}>{stats.totalOrders}</div>
+      </div>
 
-  <button onClick={addLocation} disabled={!locName || !address1 || !city}>
-    Add Location
-  </button>
-</div>
+      <div style={cardStyle}>
+        <div style={cardLabel}>Received</div>
+        <div style={cardValue}>{stats.statusCounts?.received || 0}</div>
+      </div>
+    </div>
 
-<h2 style={{ marginTop: 24 }}>Current Locations</h2>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+      <div style={panelStyle}>
+        <h3 style={{ marginTop: 0 }}>Status Breakdown</h3>
+        <div>Received: {stats.statusCounts?.received || 0}</div>
+        <div>Delivered: {stats.statusCounts?.delivered || 0}</div>
+        <div>Returned: {stats.statusCounts?.returned || 0}</div>
+        <div>Canceled: {stats.statusCounts?.canceled || 0}</div>
+      </div>
 
-{locations.map((l) => {
-  const isEditing = editingId === l._id;
+      <div style={panelStyle}>
+        <h3 style={{ marginTop: 0 }}>Popular Products (Delivered)</h3>
+        {stats.popularProducts?.length ? (
+          <div style={{ display: "grid", gap: 8 }}>
+            {stats.popularProducts.map((p) => (
+              <div key={p._id} style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>{p.name}</span>
+                <span>
+                  {p.qty} sold — ${money(p.revenue)}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div>No delivered sales yet.</div>
+        )}
+      </div>
+    </div>
+  </>
+)}
 
-  return (
-    <div key={l._id} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 10 }}>
-      {!isEditing ? (
-        <>
-          <b>{l.name}</b>
-          <div>{l.address1}{l.address2 ? `, ${l.address2}` : ""}</div>
-          <div>{l.city}{l.state ? `, ${l.state}` : ""} {l.zip}</div>
-          {l.phone && <div>📞 {l.phone}</div>}
-          {l.hours && <div>🕒 {l.hours}</div>}
-          {l.mapUrl && (
-            <div>
-              <a href={l.mapUrl} target="_blank" rel="noreferrer">Open in Maps</a>
+<hr style={{ margin: "24px 0" }} />
+<h1>Admin — Orders</h1>
+
+{orders.length === 0 ? (
+  <div>No orders yet.</div>
+) : (
+  <div style={{ display: "grid", gap: 12 }}>
+    {orders.map((o) => (
+      <div key={o._id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, background: "#fff" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: "bold" }}>Order #{o._id}</div>
+            <div style={{ color: "#666", fontSize: 12 }}>
+              {new Date(o.createdAt).toLocaleString()}
             </div>
-          )}
-
-          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-            <button onClick={() => startEdit(l)}>Edit</button>
-            <button onClick={() => deleteLocation(l._id)} style={{ color: "crimson" }}>
-              Delete
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div style={{ display: "grid", gap: 8, maxWidth: 500 }}>
-            <input value={editLoc.name} onChange={(e) => setEditLoc({ ...editLoc, name: e.target.value })} placeholder="Store name" />
-            <input value={editLoc.address1} onChange={(e) => setEditLoc({ ...editLoc, address1: e.target.value })} placeholder="Address 1" />
-            <input value={editLoc.address2} onChange={(e) => setEditLoc({ ...editLoc, address2: e.target.value })} placeholder="Address 2" />
-            <input value={editLoc.city} onChange={(e) => setEditLoc({ ...editLoc, city: e.target.value })} placeholder="City" />
-            <input value={editLoc.state} onChange={(e) => setEditLoc({ ...editLoc, state: e.target.value })} placeholder="State" />
-            <input value={editLoc.zip} onChange={(e) => setEditLoc({ ...editLoc, zip: e.target.value })} placeholder="ZIP" />
-            <input value={editLoc.phone} onChange={(e) => setEditLoc({ ...editLoc, phone: e.target.value })} placeholder="Phone" />
-            <input value={editLoc.hours} onChange={(e) => setEditLoc({ ...editLoc, hours: e.target.value })} placeholder="Hours" />
-            <input value={editLoc.mapUrl} onChange={(e) => setEditLoc({ ...editLoc, mapUrl: e.target.value })} placeholder="Google Maps link" />
           </div>
 
-          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-            <button onClick={() => saveEdit(l._id)}>Save</button>
-            <button onClick={cancelEdit}>Cancel</button>
+          <div>
+            <label style={{ fontWeight: "bold", marginRight: 8 }}>Status:</label>
+            <select value={o.status} onChange={(e) => updateOrderStatus(o._id, e.target.value)}>
+              <option value="received">Received</option>
+              <option value="delivered">Delivered</option>
+              <option value="returned">Returned</option>
+              <option value="canceled">Canceled</option>
+            </select>
           </div>
-        </>
-      )}
+        </div>
+
+        <hr style={{ margin: "12px 0" }} />
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: "bold" }}>Customer</div>
+            <div>{o.customer?.firstName} {o.customer?.lastName}</div>
+            <div>{o.customer?.email}</div>
+            <div>{o.customer?.phone}</div>
+            <div>{o.customer?.address}</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: "bold" }}>Order Summary</div>
+            <div>Subtotal: ${money(o.pricing?.subtotal)}</div>
+            <div>Shipping: ${money(o.pricing?.shipping)}</div>
+            <div>Tax: ${money(o.pricing?.tax)}</div>
+            <div style={{ marginTop: 6, fontWeight: "bold" }}>
+              Total: ${money(o.pricing?.total)}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: "bold" }}>Items</div>
+          <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+            {o.items?.map((it, idx) => {
+              const unit = Number(it.finalPrice ?? it.price ?? 0);
+              return (
+                <div key={idx} style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>{it.name} × {it.qty}</span>
+                  <span>${money(unit * it.qty)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+    
+  
+
     </div>
-  );
-})}
-    </div>
+   
     
   );
+ 
+  
 
   
   
 }
+const cardStyle = {
+  border: "1px solid #ddd",
+  borderRadius: 12,
+  padding: 14,
+  background: "#fff",
+};
+
+const cardLabel = { color: "#666", fontSize: 13 };
+const cardValue = { fontSize: 22, fontWeight: "bold", marginTop: 6 };
+
+const panelStyle = {
+  border: "1px solid #ddd",
+  borderRadius: 12,
+  padding: 16,
+  background: "#fff",
+};

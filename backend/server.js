@@ -36,6 +36,8 @@ app.use("/api/settings", require("./routes/settings"));
 
 app.use("/api/orders", require("./routes/orders"));
 
+app.use("/api/admin", require("./routes/admin"));
+
 mongoose
   .connect(
     "mongodb+srv://kidooze_user:NouraAli2026@cluster0.td7vamp.mongodb.net/toystore?retryWrites=true&w=majority"

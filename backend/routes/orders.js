@@ -100,7 +100,7 @@ router.post("/checkout", async (req, res) => {
       customer,
       items,
       pricing,
-      status: "pending",
+      status: "received",
     });
 
     const summaryText = buildSummary({ customer, items, pricing });
