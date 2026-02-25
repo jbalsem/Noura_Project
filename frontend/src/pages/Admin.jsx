@@ -57,6 +57,9 @@ const [editLoc, setEditLoc] = useState({
 
 const [discountPercent, setDiscountPercent] = useState("0");
 
+const [shippingFee, setShippingFee] = useState("5");
+const [taxPercent, setTaxPercent] = useState("8");
+
 
   async function loadCategories() {
     const res = await fetch(`${API}/api/categories`, {
@@ -177,6 +180,34 @@ const [discountPercent, setDiscountPercent] = useState("0");
     loadProducts();
   }
 
+  async function loadSettings() {
+    const res = await fetch(`${API}/api/settings`);
+    const s = await res.json();
+    setShippingFee(String(s.shippingFee ?? 0));
+    setTaxPercent(String(s.taxPercent ?? 0));
+  }
+  
+  async function saveSettings() {
+    const res = await fetch(`${API}/api/settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        shippingFee: Number(shippingFee),
+        taxPercent: Number(taxPercent),
+      }),
+    });
+  
+    const text = await res.text();
+    if (!res.ok) {
+      alert(`Save settings failed (${res.status}): ${text}`);
+      return;
+    }
+  
+    alert("Settings saved!");
+  }
+  
+
   async function loadLocations() {
     const res = await fetch(`${API}/api/locations`, {
       credentials: "include",
@@ -280,6 +311,7 @@ const [discountPercent, setDiscountPercent] = useState("0");
     loadCategories();
     loadProducts();
     loadLocations();
+    loadSettings();
   }, []);
  
 
@@ -446,6 +478,26 @@ const [discountPercent, setDiscountPercent] = useState("0");
     </div>
   );
 })}
+<hr style={{ margin: "24px 0" }} />
+<h1>Admin — Store Settings</h1>
+
+<div style={{ display: "grid", gap: 10, maxWidth: 320 }}>
+  <input
+    type="number"
+    step="0.01"
+    value={shippingFee}
+    onChange={(e) => setShippingFee(e.target.value)}
+    placeholder="Shipping fee"
+  />
+  <input
+    type="number"
+    step="0.01"
+    value={taxPercent}
+    onChange={(e) => setTaxPercent(e.target.value)}
+    placeholder="Tax percent"
+  />
+  <button onClick={saveSettings}>Save Shipping & Tax</button>
+</div>
       <hr style={{ margin: "24px 0" }} />
 
 <h1>Admin — Locations</h1>
@@ -517,5 +569,9 @@ const [discountPercent, setDiscountPercent] = useState("0");
   );
 })}
     </div>
+    
   );
+
+  
+  
 }

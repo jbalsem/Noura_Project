@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useCart } from "../hooks/useCart";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { count } = useCart();
 
   async function fetchMe() {
     try {
@@ -36,7 +38,29 @@ export default function Navbar() {
       <Link to="/categories">Categories</Link>
       <Link to="/deals">Deals</Link>
       <Link to="/locations">Locations</Link>
-      <Link to="/cart">Cart</Link>
+     
+      <Link to="/cart" style={{ position: "relative", textDecoration: "none" }}>
+  <span style={{ fontSize: 20 }}>🛒</span>
+
+  {count > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: -8,
+        right: -10,
+        background: "crimson",
+        color: "white",
+        borderRadius: 999,
+        padding: "2px 6px",
+        fontSize: 12,
+        lineHeight: 1,
+      }}
+    >
+      {count}
+    </span>
+  )}
+</Link>
+
 
       <div style={styles.right}>
         {user ? (

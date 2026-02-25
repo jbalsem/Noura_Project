@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { useCart } from "../hooks/useCart";
 
 const API = "http://localhost:5050";
+
+
 
 function money(n) {
   return Number(n).toFixed(2);
@@ -8,6 +11,7 @@ function money(n) {
 
 export default function Deals() {
   const [deals, setDeals] = useState([]);
+  const { add } = useCart();
 
   useEffect(() => {
     fetch(`${API}/api/products/deals`)
@@ -28,6 +32,9 @@ export default function Deals() {
           const original = Number(p.price);
           const newPrice = original * (1 - discount / 100);
 
+        
+         
+
           return (
             <div key={p._id} style={{ border: "1px solid #ddd", padding: 12, width: 240 }}>
               {p.image && <img src={`${API}${p.image}`} alt={p.name} width={220} />}
@@ -45,8 +52,13 @@ export default function Deals() {
               <div style={{ fontSize: 20, fontWeight: "bold", marginTop: 4 }}>
                 ${money(newPrice)}
               </div>
+              <button onClick={() => add(p)} style={{ marginTop: 8 }}>
+  Add to cart
+</button>
+              
             </div>
           );
+          
         })}
       </div>
     </div>

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
+
 
 const API = "http://localhost:5050";
 
@@ -7,6 +9,7 @@ export default function Home() {
   const [bestSellers, setBestSellers] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
   const [categories, setCategories] = useState([]);
+  const { add } = useCart();
 
   useEffect(() => {
     fetch(`${API}/api/products?section=bestSeller`)
@@ -36,7 +39,11 @@ export default function Home() {
             {p.image && <img src={`${API}${p.image}`} alt={p.name} width={180} />}
             <div><b>{p.name}</b></div>
             <div>${p.price}</div>
+            <button onClick={() => add(p)} style={{ marginTop: 8 }}>
+  Add to cart
+</button>
           </div>
+
         ))}
       </div>
 
@@ -47,8 +54,12 @@ export default function Home() {
             {p.image && <img src={`${API}${p.image}`} alt={p.name} width={180} />}
             <div><b>{p.name}</b></div>
             <div>${p.price}</div>
+            <button onClick={() => add(p)} style={{ marginTop: 8 }}>
+  Add to cart
+</button>
           </div>
         ))}
+        
       </div>
       <h2 style={{ marginTop: 40 }}>Shop by Category</h2>
 

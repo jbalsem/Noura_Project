@@ -32,6 +32,8 @@ app.use("/api/locations", require("./routes/locations"));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+app.use("/api/settings", require("./routes/settings"));
+
 mongoose
   .connect(
     "mongodb+srv://kidooze_user:NouraAli2026@cluster0.td7vamp.mongodb.net/toystore?retryWrites=true&w=majority"

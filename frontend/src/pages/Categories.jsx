@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
 
 const API = "http://localhost:5050";
 
@@ -14,6 +15,8 @@ export default function Categories() {
 
   const [searchParams] = useSearchParams();
   const categoryIdFromUrl = searchParams.get("categoryId");
+
+  const { add } = useCart();
 
   useEffect(() => {
     fetch(`${API}/api/categories`).then(r => r.json()).then(setCategories);
@@ -74,6 +77,9 @@ export default function Categories() {
                 {p.image && <img src={`${API}${p.image}`} alt={p.name} width={180} />}
                 <div><b>{p.name}</b></div>
                 <div>${p.price}</div>
+                <button onClick={() => add(p)} style={{ marginTop: 8 }}>
+  Add to cart
+</button>
                 <div style={{ fontSize: 12 }}>Age {p.ageMin}-{p.ageMax}</div>
               </div>
             ))}
