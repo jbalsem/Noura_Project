@@ -38,6 +38,8 @@ app.use("/api/orders", require("./routes/orders"));
 
 app.use("/api/admin", require("./routes/admin"));
 
+app.use("/api/admin/orders", require("./routes/adminOrders"));
+
 app.use("/api/hero-slides", require("./routes/heroSlides"));
 
 mongoose

@@ -357,6 +357,32 @@ const [heroOrder, setHeroOrder] = useState("0");
     loadStats();
   }
 
+  async function deleteOrder(orderId) {
+    const ok = window.confirm("Delete this order permanently?");
+    if (!ok) return;
+  
+    // optimistic remove
+    setOrders((prev) => prev.filter((o) => o._id !== orderId));
+  
+    const res = await fetch(`${API}/api/admin/orders/${orderId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  
+    const text = await res.text();
+    console.log("DELETE status:", res.status, "response:", text);
+  
+    if (!res.ok) {
+      alert(`Failed to delete order (${res.status}): ${text}`);
+      // bring back correct list from DB
+      loadOrders();
+      return;
+    }
+  
+    // refresh stats too
+    loadStats();
+  }
+
   async function loadHeroSlides() {
     const res = await fetch(`${API}/api/hero-slides/all`, { credentials: "include" });
     const text = await res.text();
@@ -432,12 +458,45 @@ const [heroOrder, setHeroOrder] = useState("0");
     
     
     <div style={{ padding: 24 }}>
-      <h1>Admin — Products</h1>
-      <div style={{ marginBottom: 16 }}>
-  <a href="/admin/categories">Manage Categories</a>
+      <SectionHeader
+  id="top"
+  title="Admin Dashboard"
+  subtitle="Use this page to manage hero images, products, locations, store settings, and orders."
+/>
+
+<HelpBox title="✅ How to use this page (Quick Guide)">
+  <ol style={{ margin: 0, paddingLeft: 18 }}>
+    <li><b>Hero Slideshow:</b> Upload homepage hero images and set their order.</li>
+    <li><b>Products:</b> Add new toys, edit existing ones, or delete products.</li>
+    <li><b>Locations:</b> Add store locations and update hours / map links.</li>
+    <li><b>Settings:</b> Control shipping fee and tax percentage.</li>
+    <li><b>Orders:</b> Update the order status or delete an order (permanent).</li>
+  </ol>
+</HelpBox>
+
+<div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+  <a href="#hero" style={quickLinkStyle}>Hero</a>
+  <a href="#products" style={quickLinkStyle}>Products</a>
+  <a href="#locations" style={quickLinkStyle}>Locations</a>
+  <a href="#settings" style={quickLinkStyle}>Settings</a>
+  <a href="#dashboard" style={quickLinkStyle}>Sales</a>
+  <a href="#orders" style={quickLinkStyle}>Orders</a>
 </div>
-<hr style={{ margin: "24px 0" }} />
-<h1>Admin — Hero Slideshow</h1>
+      <hr style={{ margin: "24px 0" }} />
+      <SectionHeader
+  id="hero"
+  title="Admin — Hero Slideshow"
+  subtitle="Upload images for the homepage banner. Order 0 shows first."
+/>
+
+<HelpBox title="Steps">
+  <ol style={{ margin: 0, paddingLeft: 18 }}>
+    <li>Choose an <b>Order</b> number (0 = first).</li>
+    <li>Select an image file.</li>
+    <li>Click <b>Upload Hero Image</b>.</li>
+    <li>Use <b>Enable/Disable</b> to show/hide an image.</li>
+  </ol>
+</HelpBox>
 
 <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
   <input
@@ -451,7 +510,6 @@ const [heroOrder, setHeroOrder] = useState("0");
     Upload Hero Image
   </button>
 </div>
-
 <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
   {heroAll.map((s) => (
     <div key={s._id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12, background: "#fff", display: "flex", gap: 12, alignItems: "center" }}>
@@ -478,10 +536,36 @@ const [heroOrder, setHeroOrder] = useState("0");
             Delete
           </button>
         </div>
+        
       </div>
+      <div style={{ marginTop: 14 }}>
+    <a href="#top" style={{ color: "#555", fontSize: 13, textDecoration: "none" }}>
+      ↑ Back to top
+    </a>
+  </div>
     </div>
+    
   ))}
 </div>
+
+
+<SectionHeader
+  id="products"
+  title="Admin — Products"
+  subtitle="Add new products, edit them, and manage discounts."
+/>
+
+<HelpBox title="Tips">
+  <ul style={{ margin: 0, paddingLeft: 18 }}>
+    <li><b>Discount %</b> reduces price automatically on the store.</li>
+    <li>Use <b>Best Seller</b> and <b>New Arrival</b> to highlight items.</li>
+    <li><b>Delete</b> removes the product permanently.</li>
+  </ul>
+</HelpBox>
+      <div style={{ marginBottom: 16 }}>
+  <a href="/admin/categories">Manage Categories</a>
+</div>
+
 
       <div style={{ display: "grid", gap: 10, maxWidth: 500 }}>
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -552,8 +636,12 @@ const [heroOrder, setHeroOrder] = useState("0");
                 Delete
               </button>
             </div>
+            
           </div>
+          
+          
         </div>
+        
       ) : (
         <>
           <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
@@ -635,12 +723,33 @@ const [heroOrder, setHeroOrder] = useState("0");
             <button onClick={cancelEditProduct}>Cancel</button>
           </div>
         </>
+        
       )}
+      <div style={{ marginTop: 14 }}>
+    <a href="#top" style={{ color: "#555", fontSize: 13, textDecoration: "none" }}>
+      ↑ Back to top
+    </a>
+  </div>
+      
     </div>
+    
   );
+  
 })}
 <hr style={{ margin: "24px 0" }} />
-<h1>Admin — Locations</h1>
+<SectionHeader
+  id="locations"
+  title="Admin — Locations"
+  subtitle="Add/edit store locations customers can see on the Locations page."
+/>
+
+<HelpBox title="Steps">
+  <ol style={{ margin: 0, paddingLeft: 18 }}>
+    <li>Fill out the address and city.</li>
+    <li>Add phone/hours (optional but recommended).</li>
+    <li>Paste a Google Maps link so customers can tap it.</li>
+  </ol>
+</HelpBox>
 
 <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
   <input placeholder="Location name" value={locName} onChange={(e) => setLocName(e.target.value)} />
@@ -759,10 +868,76 @@ const [heroOrder, setHeroOrder] = useState("0");
         </div>
       );
     })}
+    <div style={{ marginTop: 14 }}>
+    <a href="#top" style={{ color: "#555", fontSize: 13, textDecoration: "none" }}>
+      ↑ Back to top
+    </a>
+  </div>
   </div>
 )}
+
 <hr style={{ margin: "24px 0" }} />
-<h1>Admin — Sales Dashboard</h1>
+
+<SectionHeader
+  id="settings"
+  title="Admin — Store Settings"
+  subtitle="Control shipping fee and tax percentage used at checkout."
+/>
+
+<HelpBox title="How it works">
+  <ul style={{ margin: 0, paddingLeft: 18 }}>
+    <li><b>Shipping Fee</b> is a flat amount added to every order.</li>
+    <li><b>Tax %</b> is applied to the subtotal.</li>
+    <li>Click <b>Save Settings</b> after changes.</li>
+  </ul>
+</HelpBox>
+
+<div style={{ display: "grid", gap: 10, maxWidth: 420 }}>
+  <label style={{ display: "grid", gap: 6 }}>
+    <span style={{ fontWeight: "bold" }}>Shipping Fee ($)</span>
+    <input
+      type="number"
+      step="0.01"
+      value={shippingFee}
+      onChange={(e) => setShippingFee(e.target.value)}
+    />
+  </label>
+
+  <label style={{ display: "grid", gap: 6 }}>
+    <span style={{ fontWeight: "bold" }}>Tax Percent (%)</span>
+    <input
+      type="number"
+      step="0.01"
+      value={taxPercent}
+      onChange={(e) => setTaxPercent(e.target.value)}
+    />
+  </label>
+
+  <button onClick={saveSettings}>Save Settings</button>
+
+  <div style={{ color: "#666", fontSize: 13 }}>
+    Current preview: Shipping ${Number(shippingFee || 0).toFixed(2)} • Tax{" "}
+    {Number(taxPercent || 0).toFixed(2)}%
+  </div>
+
+  <div style={{ marginTop: 14 }}>
+    <a href="#top" style={{ color: "#555", fontSize: 13, textDecoration: "none" }}>
+      ↑ Back to top
+    </a>
+  </div>
+</div>
+
+<hr style={{ margin: "24px 0" }} />
+<SectionHeader
+  id="dashboard"
+  title="Admin — Sales Dashboard"
+  subtitle="Live stats update when orders are marked as Delivered."
+/>
+
+<HelpBox title="How revenue is counted">
+  Revenue and popular products are calculated from <b>Delivered</b> orders only.
+  If you want stats to update, change the order status to Delivered.
+</HelpBox>
 
 {!stats ? (
   <div>Loading stats...</div>
@@ -816,19 +991,49 @@ const [heroOrder, setHeroOrder] = useState("0");
           <div>No delivered sales yet.</div>
         )}
       </div>
+      <div style={{ marginTop: 14 }}>
+    <a href="#top" style={{ color: "#555", fontSize: 13, textDecoration: "none" }}>
+      ↑ Back to top
+    </a>
+  </div>
     </div>
+
   </>
 )}
 
 <hr style={{ margin: "24px 0" }} />
-<h1>Admin — Orders</h1>
+<SectionHeader
+  id="orders"
+  title="Admin — Orders"
+  subtitle="Review new orders, change their status, or delete them (permanent)."
+/>
+
+<HelpBox title="Order workflow">
+  <ol style={{ margin: 0, paddingLeft: 18 }}>
+    <li><b>Received</b> → order came in.</li>
+    <li><b>Delivered</b> → completed (counts in sales dashboard).</li>
+    <li><b>Returned</b> → refunded/returned.</li>
+    <li><b>Canceled</b> → canceled before delivery.</li>
+  </ol>
+  <div style={{ marginTop: 8 }}>
+    ⚠️ <b>Delete</b> permanently removes the order from the database.
+  </div>
+</HelpBox>
 
 {orders.length === 0 ? (
   <div>No orders yet.</div>
 ) : (
   <div style={{ display: "grid", gap: 12 }}>
     {orders.map((o) => (
-      <div key={o._id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, background: "#fff" }}>
+      <div
+        key={o._id}
+        style={{
+          border: "1px solid #ddd",
+          borderRadius: 12,
+          padding: 16,
+          background: "#fff",
+        }}
+      >
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
           <div>
             <div style={{ fontWeight: "bold" }}>Order #{o._id}</div>
@@ -837,14 +1042,35 @@ const [heroOrder, setHeroOrder] = useState("0");
             </div>
           </div>
 
-          <div>
-            <label style={{ fontWeight: "bold", marginRight: 8 }}>Status:</label>
-            <select value={o.status} onChange={(e) => updateOrderStatus(o._id, e.target.value)}>
-              <option value="received">Received</option>
-              <option value="delivered">Delivered</option>
-              <option value="returned">Returned</option>
-              <option value="canceled">Canceled</option>
-            </select>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 8 }}>Status:</label>
+              <select
+                value={o.status}
+                onChange={(e) => updateOrderStatus(o._id, e.target.value)}
+              >
+                <option value="received">Received</option>
+                <option value="delivered">Delivered</option>
+                <option value="returned">Returned</option>
+                <option value="canceled">Canceled</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => deleteOrder(o._id)}
+              style={{
+                background: "#ff3b30",
+                color: "white",
+                border: "none",
+                borderRadius: 10,
+                padding: "6px 12px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Delete
+            </button>
           </div>
         </div>
 
@@ -853,7 +1079,9 @@ const [heroOrder, setHeroOrder] = useState("0");
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
             <div style={{ fontWeight: "bold" }}>Customer</div>
-            <div>{o.customer?.firstName} {o.customer?.lastName}</div>
+            <div>
+              {o.customer?.firstName} {o.customer?.lastName}
+            </div>
             <div>{o.customer?.email}</div>
             <div>{o.customer?.phone}</div>
             <div>{o.customer?.address}</div>
@@ -877,7 +1105,9 @@ const [heroOrder, setHeroOrder] = useState("0");
               const unit = Number(it.finalPrice ?? it.price ?? 0);
               return (
                 <div key={idx} style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>{it.name} × {it.qty}</span>
+                  <span>
+                    {it.name} × {it.qty}
+                  </span>
                   <span>${money(unit * it.qty)}</span>
                 </div>
               );
@@ -888,10 +1118,16 @@ const [heroOrder, setHeroOrder] = useState("0");
     ))}
   </div>
 )}
+<div style={{ marginTop: 14 }}>
+    <a href="#top" style={{ color: "#555", fontSize: 13, textDecoration: "none" }}>
+      ↑ Back to top
+    </a>
+  </div>
     
   
 
     </div>
+
    
     
   );
@@ -901,6 +1137,46 @@ const [heroOrder, setHeroOrder] = useState("0");
   
   
 }
+function HelpBox({ title, children }) {
+  return (
+    <div
+      style={{
+        border: "1px solid #e5e5e5",
+        background: "#fffdf2",
+        borderRadius: 14,
+        padding: 14,
+        marginBottom: 16,
+      }}
+    >
+      <div style={{ fontWeight: "bold", marginBottom: 6 }}>{title}</div>
+      <div style={{ color: "#444", fontSize: 14, lineHeight: 1.5 }}>{children}</div>
+    </div>
+  );
+}
+
+function SectionHeader({ id, title, subtitle }) {
+  return (
+    <div id={id} style={{ marginTop: 18 }}>
+      <h1 style={{ marginBottom: 6 }}>{title}</h1>
+      {subtitle ? (
+        <div style={{ color: "#666", marginBottom: 12, lineHeight: 1.4 }}>
+          {subtitle}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+const quickLinkStyle = {
+  display: "inline-block",
+  padding: "8px 12px",
+  borderRadius: 999,
+  border: "1px solid #ddd",
+  background: "#fff",
+  textDecoration: "none",
+  color: "#111",
+  fontSize: 14,
+};
 const cardStyle = {
   border: "1px solid #ddd",
   borderRadius: 12,
