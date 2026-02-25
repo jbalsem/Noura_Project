@@ -14,13 +14,13 @@ async function run() {
 
   if (!email || !password) throw new Error("Missing ADMIN_EMAIL or ADMIN_PASSWORD in .env");
 
-  const exists = await User.findOne({ email });
-  if (exists) {
-    console.log("Admin already exists:", email);
+  const existingAdmin = await User.findOne({ role: "admin" });
+  if (existingAdmin) {
+    console.log("Admin already exists:", existingAdmin.email);
     process.exit(0);
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   await User.create({ email, passwordHash, role: "admin", firstName: "Admin" });
 
   console.log("✅ Admin created:", email);
