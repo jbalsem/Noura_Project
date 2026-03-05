@@ -1,4 +1,4 @@
-
+require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -16,6 +16,8 @@ app.use(cors({
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
+        "https://kidooze.com",
+      "https://www.kidooze.com",
       ],
     credentials: true
   }));
@@ -43,18 +45,9 @@ app.use("/api/admin/orders", require("./routes/adminOrders"));
 app.use("/api/hero-slides", require("./routes/heroSlides"));
 
 mongoose
-  .connect(
-    "mongodb+srv://kidooze_user:NouraAli2026@cluster0.td7vamp.mongodb.net/toystore?retryWrites=true&w=majority"
-  )
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("Mongo error:", err));
+  .catch((err) => console.error("Mongo error:", err));
 
-
-
-const PORT = 5050;
-
-
-
-app.listen(PORT, () =>
-  console.log(`Backend running on port ${PORT}`)
-);
+const PORT = process.env.PORT || 5050;
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

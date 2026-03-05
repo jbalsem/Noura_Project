@@ -9,21 +9,20 @@ async function run() {
 
   await mongoose.connect(MONGO);
 
-  const email = process.env.ADMIN_EMAIL;
+  const email = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
   const password = process.env.ADMIN_PASSWORD;
 
   if (!email || !password) throw new Error("Missing ADMIN_EMAIL or ADMIN_PASSWORD in .env");
 
-  const existingAdmin = await User.findOne({ role: "admin" });
-  if (existingAdmin) {
-    console.log("Admin already exists:", existingAdmin.email);
-    process.exit(0);
-  }
-
   const passwordHash = await bcrypt.hash(password, 12);
-  await User.create({ email, passwordHash, role: "admin", firstName: "Admin" });
 
-  console.log("✅ Admin created:", email);
+  const admin = await User.findOneAndUpdate(
+    { role: "admin" },
+    { email, passwordHash, role: "admin", firstName: "Admin" },
+    { upsert: true, new: true }
+  );
+
+  console.log("✅ Admin ready:", admin.email);
   process.exit(0);
 }
 
