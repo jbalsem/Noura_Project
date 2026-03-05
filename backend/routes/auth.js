@@ -7,24 +7,20 @@ const { requireAuth } = require("../middleware/auth");
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 
-function setTokenCookie(res, payload) {
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
-
+function cookieOptions() {
   const isProd = process.env.NODE_ENV === "production";
-
-res.cookie("token", token, {
-  httpOnly: true,
-  sameSite: isProd ? "none" : "lax",
-  secure: isProd,
-  path: "/",
-});
+  return {
+    httpOnly: true,
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
+    path: "/",
+  };
 }
 
-res.clearCookie("token", {
-  path: "/",
-  sameSite: isProd ? "none" : "lax",
-  secure: isProd,
-});
+function setTokenCookie(res, payload) {
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  res.cookie("token", token, cookieOptions());
+}
 
 // Register (for normal users)
 router.post("/register", async (req, res) => {
@@ -70,7 +66,7 @@ router.get("/me", requireAuth, async (req, res) => {
 
 // Logout
 router.post("/logout", (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", cookieOptions());
   res.json({ ok: true });
 });
 
