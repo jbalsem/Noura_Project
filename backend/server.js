@@ -18,6 +18,7 @@ app.use(cors({
         "http://localhost:5175",
         "https://kidooze.com",
       "https://www.kidooze.com",
+      "https://kidooze.vercel.app"
       ],
     credentials: true
   }));
