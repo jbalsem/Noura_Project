@@ -10,12 +10,21 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 function setTokenCookie(res, payload) {
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false, // true only when using HTTPS in production
-  });
+  const isProd = process.env.NODE_ENV === "production";
+
+res.cookie("token", token, {
+  httpOnly: true,
+  sameSite: isProd ? "none" : "lax",
+  secure: isProd,
+  path: "/",
+});
 }
+
+res.clearCookie("token", {
+  path: "/",
+  sameSite: isProd ? "none" : "lax",
+  secure: isProd,
+});
 
 // Register (for normal users)
 router.post("/register", async (req, res) => {
