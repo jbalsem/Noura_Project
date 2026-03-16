@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
@@ -10,7 +11,10 @@ const cookieParser = require("cookie-parser");
 
 console.log("🔥 THIS SERVER FILE IS RUNNING 🔥");
 
+
 const app = express();
+app.set("trust proxy", 1);
+
 app.use(cors({
     origin: [
         "http://localhost:5173",

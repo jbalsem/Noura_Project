@@ -8,11 +8,16 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 
 function cookieOptions() {
-  const isProd = process.env.NODE_ENV === "production";
+  const isDeployed =
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
+    !!process.env.RENDER_EXTERNAL_URL ||
+    !!process.env.RAILWAY_ENVIRONMENT;
+
   return {
     httpOnly: true,
-    sameSite: isProd ? "none" : "lax",
-    secure: isProd,
+    sameSite: isDeployed ? "none" : "lax",
+    secure: isDeployed,
     path: "/",
   };
 }
